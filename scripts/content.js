@@ -114,7 +114,6 @@ function handle_body_param(param_source, schemas) {
     }
     return body_params;
 }
-//TODO query和body都有参数的请求
 
 function get_request_method(paths, url) {
     if (paths[url].get) {
