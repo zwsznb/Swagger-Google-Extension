@@ -1,16 +1,6 @@
-// var data = Mock.mock({
-//     // 属性 list 的值是一个数组，其中含有 1 到 10 个元素
-//     'list|1-10': [{
-//         // 属性 id 是一个自增数，起始值为 1，每次增 1
-//         'id|+1': 1
-//     }]
-// })
-// // 输出结果
-// console.log(JSON.stringify(data, null, 4))
 const swagger_pre_url = "/swagger/v1/swagger.json";
 const local_save_key = "swagger_param";
 let swagger_json_path = location.origin + swagger_pre_url;
-window.getTest = function () { console.log("gggg") };
 http.get(swagger_json_path, function (err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
@@ -123,12 +113,6 @@ function handle_body_param(param_source, schemas) {
         body_params.push(body_param);
     }
     return body_params;
-}
-function mock_url_data() {
-
-}
-function mock_body_data() {
-
 }
 //TODO query和body都有参数的请求
 
