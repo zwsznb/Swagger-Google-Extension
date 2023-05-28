@@ -7,8 +7,10 @@
 // })
 // // 输出结果
 // console.log(JSON.stringify(data, null, 4))
-
-let swagger_json_path = location.origin + "/swagger/v1/swagger.json";
+const swagger_pre_url = "/swagger/v1/swagger.json";
+const local_save_key = "swagger_param";
+let swagger_json_path = location.origin + swagger_pre_url;
+window.getTest = function () { console.log("gggg") };
 http.get(swagger_json_path, function (err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
@@ -25,8 +27,18 @@ function receive_paths(paths, object_param) {
             params: url_node
         });
     }
-    console.log(url_param_map);
-
+    //保存到本地缓存，或者其它地方,
+    //TODO如果保存的大小有限，可以考虑不保存没有输入参数的请求
+    save(url_param_map);
+    get_swagger_param();
+}
+function save(url_param_map) {
+    let save_str = JSON.stringify(url_param_map);
+    localStorage.setItem(local_save_key, save_str);
+}
+function get_swagger_param() {
+    let a = localStorage.getItem(local_save_key);
+    console.log(JSON.parse(a));
 }
 //把所有的请求参数合并
 //统一格式 { url:/path,param:[{name:name,type:string,in:"query or body"}] }
@@ -45,28 +57,19 @@ function handle_param(url, paths, schemas) {
     let url_node = null;
     if (method === "GET") {
         let get = paths[url].get;
-        url_node = handle_get_param(get, schemas);
+        url_node = handle_request_param(get, schemas);
     }
     if (method === "POST") {
         let post = paths[url].post;
-        url_node = handle_post_param(post, schemas);
+        url_node = handle_request_param(post, schemas);
     }
     return url_node;
 }
-function handle_get_param(param_source, schemas) {
+function handle_request_param(param_source, schemas) {
     let url_param = handle_url_param(param_source);
     let body_param = handle_body_param(param_source, schemas);
     //合并 
-    //TODO 可能会有问题，得留意
-    let params = {};
-    Object.assign(params, url_param, body_param);
-    return params;
-}
-function handle_post_param(param_source, schemas) {
-    let url_param = handle_url_param(param_source);
-    let body_param = handle_body_param(param_source, schemas);
-    //合并
-    //TODO 可能会有问题，得留意
+    //TODO 可能会有问题，得留意，没有考虑到对象类型的参数
     let params = {};
     Object.assign(params, url_param, body_param);
     return params;
@@ -80,8 +83,8 @@ function handle_url_param(param_source) {
     let params = param_source.parameters;
     for (let param in params) {
         let url_param = {
-            name: param.name,
-            in: param.in,
+            name: params[param].name,
+            in: params[param].in,
             type: params[param].schema.type
         };
         if (!url_param.name) {
@@ -98,6 +101,7 @@ function handle_body_param(param_source, schemas) {
     if (!param_source.requestBody) {
         return [];
     }
+    //TODO看看要不要改
     let body_dto = param_source.requestBody.content["application/json"]["schema"]["$ref"];
     let temp_arr = body_dto.split("/");
     //TODO 忘了怎么改了
