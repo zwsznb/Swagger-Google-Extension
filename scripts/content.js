@@ -1,12 +1,13 @@
-const swagger_pre_url = "/api/swagger/v1/swagger.json";
+const swagger_pre_url = "/swagger/v1/swagger.json";
 const local_save_key = "swagger_param";
 let swagger_json_path = location.origin + swagger_pre_url;
-http.get(swagger_json_path, function(err, result) {
+http.get(swagger_json_path, function (err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
     }
     receive_paths(result.paths, result.components.schemas);
 });
+
 
 function receive_paths(paths, object_param) {
     let url_param_map = [];
@@ -131,8 +132,19 @@ function get_request_method(paths, url) {
         return "POST";
     }
 }
+
+
+
+let timer = null
+function interval(func, wait) {
+    let interv = function () {
+        func.call(null);
+        timer = setTimeout(interv, wait);
+    };
+    timer = setTimeout(interv, wait);
+}
 let map = [];
-setInterval(() => {
+interval(() => {
     let list = document.getElementsByClassName("opblock-body");
     //如果
     if (list) {
@@ -153,19 +165,41 @@ setInterval(() => {
         }
     }
 }, 900);
-
 function get_swagger_param(url) {
     let local_data = localStorage.getItem(local_save_key);
     let format_data = JSON.parse(local_data);
     let data = null;
+    console.log(format_data);
     format_data.forEach(element => {
-        if (element.url === url) {
+        console.log(element, element.url, url);
+        //格式化url
+        let url_temp = format_url(url);
+        console.log(url_temp);
+        if (element.url === url_temp) {
+            console.log("找到元素");
             data = element;
         }
     });
     return data;
 }
 
+function format_url(url) {
+    //去头
+    console.log(url.length);
+    url = url.substr(1);
+    console.log(url.length);
+    console.dir("", url);
+    let url_split = url.split("/").filter(data => data !== "");
+    let url_temp = "";
+    for (let i in url_split) {
+        console.log(url_split[i].charCodeAt(url_split[i].length - 1));
+        if (url_split[i].charCodeAt(url_split[i].length - 1) === 0xFEFF) {
+            console.log("存在bom头");
+        }
+        url_temp += "/" + url_split[i].substr(0, url_split[i].length - 1);
+    }
+    return url_temp;
+}
 // function is_have_param(url) {
 //     let url_param = get_swagger_param(url);
 //     if (url_param.params.length > 0) {
@@ -182,17 +216,9 @@ function create_btn(url) {
     btn.textContent = "mock";
     btn.id = url;
     div.appendChild(btn);
-    btn.onclick = function() {
-        let local_data = localStorage.getItem(local_save_key);
-        let format_data = JSON.parse(local_data);
-        let data = null;
-        format_data.forEach(element => {
-            if (element.url === this.id) {
-                data = element;
-            }
-        });
-        console.log(data);
-        // console.log(get_swagger_param(this.id));
+    btn.onclick = function () {
+        console.log(this.id);
+        console.log(get_swagger_param(this.id));
     }
     return div;
 }

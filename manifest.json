@@ -14,7 +14,7 @@
         ],
         "runAt": "document_idle",
         "matches": [
-            "http://*/api/swagger/index.html"
+            "http://*/swagger/index.html"
         ]
     }]
 }
