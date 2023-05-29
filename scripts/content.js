@@ -1,12 +1,13 @@
-const swagger_pre_url = "/swagger/v1/swagger.json";
+const swagger_pre_url = "/api/swagger/v1/swagger.json";
 const local_save_key = "swagger_param";
 let swagger_json_path = location.origin + swagger_pre_url;
-http.get(swagger_json_path, function (err, result) {
+http.get(swagger_json_path, function(err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
     }
     receive_paths(result.paths, result.components.schemas);
 });
+
 function receive_paths(paths, object_param) {
     let url_param_map = [];
     for (let url in paths) {
@@ -22,10 +23,12 @@ function receive_paths(paths, object_param) {
     save(url_param_map);
     get_swagger_param();
 }
+
 function save(url_param_map) {
     let save_str = JSON.stringify(url_param_map);
     localStorage.setItem(local_save_key, save_str);
 }
+
 function get_swagger_param() {
     let a = localStorage.getItem(local_save_key);
     console.log(JSON.parse(a));
@@ -55,6 +58,7 @@ function handle_param(url, paths, schemas) {
     }
     return url_node;
 }
+
 function handle_request_param(param_source, schemas) {
     let url_param = handle_url_param(param_source);
     let body_param = handle_body_param(param_source, schemas);
@@ -91,8 +95,16 @@ function handle_body_param(param_source, schemas) {
     if (!param_source.requestBody) {
         return [];
     }
-    //TODO看看要不要改
+    //TODO 看看要不要改
+    //TODO 文件上传忽略
+    if (param_source.requestBody.content["multipart/form-data"]) {
+        return [];
+    }
     let body_dto = param_source.requestBody.content["application/json"]["schema"]["$ref"];
+    //TODO url和body双合一请求处理
+    if (!body_dto) {
+        return [];
+    }
     let temp_arr = body_dto.split("/");
     //TODO 忘了怎么改了
     let dto_name = "";
