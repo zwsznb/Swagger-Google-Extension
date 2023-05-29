@@ -21,7 +21,6 @@ function receive_paths(paths, object_param) {
     //保存到本地缓存，或者其它地方,
     //TODO如果保存的大小有限，可以考虑不保存没有输入参数的请求
     save(url_param_map);
-    get_swagger_param();
 }
 
 function save(url_param_map) {
@@ -29,10 +28,7 @@ function save(url_param_map) {
     localStorage.setItem(local_save_key, save_str);
 }
 
-function get_swagger_param() {
-    let a = localStorage.getItem(local_save_key);
-    console.log(JSON.parse(a));
-}
+
 //把所有的请求参数合并
 //统一格式 { url:/path,param:[{name:name,type:string,in:"query or body"}] }
 //"parameters": [
@@ -134,4 +130,69 @@ function get_request_method(paths, url) {
     if (paths[url].post) {
         return "POST";
     }
+}
+let map = [];
+setInterval(() => {
+    let list = document.getElementsByClassName("opblock-body");
+    //如果
+    if (list) {
+        for (let index in list) {
+            if (!list[index].parentNode) {
+                continue;
+            }
+            let url_method = list[index].parentNode.parentNode.getElementsByClassName("opblock-summary-control")[0].ariaLabel.split(" ");
+            let method = url_method[0];
+            let url = url_method[1];
+            //插入元素
+            //如果不存在该元素才进行插入元素
+            let section = list[index].getElementsByClassName("opblock-section-header")[0];
+            if (document.getElementById(url)) {
+                continue;
+            }
+            section.appendChild(create_btn(url));
+        }
+    }
+}, 900);
+
+function get_swagger_param(url) {
+    let local_data = localStorage.getItem(local_save_key);
+    let format_data = JSON.parse(local_data);
+    let data = null;
+    format_data.forEach(element => {
+        if (element.url === url) {
+            data = element;
+        }
+    });
+    return data;
+}
+
+// function is_have_param(url) {
+//     let url_param = get_swagger_param(url);
+//     if (url_param.params.length > 0) {
+//         return true;
+//     }
+//     return false;
+// }
+
+function create_btn(url) {
+    let div = document.createElement("div");
+    div.className = "try-out";
+    let btn = document.createElement("button");
+    btn.className += "btn try-out__btn";
+    btn.textContent = "mock";
+    btn.id = url;
+    div.appendChild(btn);
+    btn.onclick = function() {
+        let local_data = localStorage.getItem(local_save_key);
+        let format_data = JSON.parse(local_data);
+        let data = null;
+        format_data.forEach(element => {
+            if (element.url === this.id) {
+                data = element;
+            }
+        });
+        console.log(data);
+        // console.log(get_swagger_param(this.id));
+    }
+    return div;
 }
