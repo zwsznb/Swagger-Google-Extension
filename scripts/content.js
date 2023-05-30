@@ -1,7 +1,7 @@
-const swagger_pre_url = "/swagger/v1/swagger.json";
+const swagger_pre_url = "/api/swagger/v1/swagger.json";
 const local_save_key = "swagger_param";
 let swagger_json_path = location.origin + swagger_pre_url;
-http.get(swagger_json_path, function (err, result) {
+http.get(swagger_json_path, function(err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
     }
@@ -61,9 +61,9 @@ function handle_request_param(param_source, schemas) {
     let body_param = handle_body_param(param_source, schemas);
     //合并 
     //TODO 可能会有问题，得留意，没有考虑到对象类型的参数
-    let params = {};
-    Object.assign(params, url_param, body_param);
-    return params;
+    // let params = {};
+    // Object.assign(params, url_param, body_param);
+    return [...url_param, ...body_param];
 }
 //处理url上的参数
 function handle_url_param(param_source) {
@@ -136,77 +136,57 @@ function get_request_method(paths, url) {
 
 
 let timer = null
+
 function interval(func, wait) {
-    let interv = function () {
+    let interv = function() {
         func.call(null);
         timer = setTimeout(interv, wait);
     };
     timer = setTimeout(interv, wait);
 }
 let map = [];
+//定时监听页面变化并添加按钮
 interval(() => {
     let list = document.getElementsByClassName("opblock-body");
-    //如果
     if (list) {
         for (let index in list) {
             if (!list[index].parentNode) {
                 continue;
             }
-            let url_method = list[index].parentNode.parentNode.getElementsByClassName("opblock-summary-control")[0].ariaLabel.split(" ");
-            let method = url_method[0];
-            let url = url_method[1];
+            let url_method = list[index].parentNode.parentNode.getElementsByClassName("opblock-summary-path")[0];
+            let url = url_method.getAttribute("data-path");
             //插入元素
             //如果不存在该元素才进行插入元素
             let section = list[index].getElementsByClassName("opblock-section-header")[0];
             if (document.getElementById(url)) {
                 continue;
             }
-            section.appendChild(create_btn(url));
+            if (is_have_param(url)) {
+                section.appendChild(create_btn(url));
+            }
         }
     }
 }, 900);
+
 function get_swagger_param(url) {
     let local_data = localStorage.getItem(local_save_key);
     let format_data = JSON.parse(local_data);
     let data = null;
-    console.log(format_data);
     format_data.forEach(element => {
-        console.log(element, element.url, url);
-        //格式化url
-        let url_temp = format_url(url);
-        console.log(url_temp);
-        if (element.url === url_temp) {
-            console.log("找到元素");
+        if (element.url === url) {
             data = element;
         }
     });
     return data;
 }
 
-function format_url(url) {
-    //去头
-    console.log(url.length);
-    url = url.substr(1);
-    console.log(url.length);
-    console.dir("", url);
-    let url_split = url.split("/").filter(data => data !== "");
-    let url_temp = "";
-    for (let i in url_split) {
-        console.log(url_split[i].charCodeAt(url_split[i].length - 1));
-        if (url_split[i].charCodeAt(url_split[i].length - 1) === 0xFEFF) {
-            console.log("存在bom头");
-        }
-        url_temp += "/" + url_split[i].substr(0, url_split[i].length - 1);
+function is_have_param(url) {
+    let url_param = get_swagger_param(url);
+    if (url_param.params.length > 0) {
+        return true;
     }
-    return url_temp;
+    return false;
 }
-// function is_have_param(url) {
-//     let url_param = get_swagger_param(url);
-//     if (url_param.params.length > 0) {
-//         return true;
-//     }
-//     return false;
-// }
 
 function create_btn(url) {
     let div = document.createElement("div");
@@ -216,8 +196,7 @@ function create_btn(url) {
     btn.textContent = "mock";
     btn.id = url;
     div.appendChild(btn);
-    btn.onclick = function () {
-        console.log(this.id);
+    btn.onclick = function() {
         console.log(get_swagger_param(this.id));
     }
     return div;
