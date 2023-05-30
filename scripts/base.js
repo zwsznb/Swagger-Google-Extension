@@ -1,7 +1,7 @@
-const swagger_pre_url = "/api/swagger/v1/swagger.json";
+const swagger_pre_url = "/swagger/v1/swagger.json";
 const local_save_key = "swagger_param";
 let swagger_json_path = location.origin + swagger_pre_url;
-http.get(swagger_json_path, function(err, result) {
+http.get(swagger_json_path, function (err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
     }
@@ -137,7 +137,7 @@ function get_request_method(paths, url) {
 let timer = null
 
 function interval(func, wait) {
-    let interv = function() {
+    let interv = function () {
         func.call(null);
         timer = setTimeout(interv, wait);
     };
@@ -195,19 +195,63 @@ function create_btn(url) {
     btn.textContent = "mock";
     btn.id = url;
     div.appendChild(btn);
-    btn.onclick = function() {
+    btn.onclick = function () {
         let assgined = call_chain(get_swagger_param(this.id));
         //填充页面数据
-        console.log(assgined);
+        render_data(assgined, this);
     }
     return div;
 }
+function render_data(assgined_params, btn_ele) {
+    let body_params = [];
+    let url_params = [];
+    let params = assgined_params.params;
+    for (let i in params) {
+        if (params[i].in === "body") {
+            body_params.push(params[i]);
+        }
+        if (params[i].in === "query") {
+            url_params.push(params[i]);
+        }
+    }
+    if (body_params.length !== 0) {
+        render_body_data(body_params, btn_ele);
+    }
+    if (url_params.length !== 0) {
+        render_url_data(url_params, btn_ele);
+    }
+}
 
 //填充body数据
-function fill_body_data(url_params) {
-
+function render_body_data(body_params, btn_ele) {
+    //先获取页面上的json，修改数据再赋值回去
+    //格式化json
+    let textarea = btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("textarea")[0];
+    if (!textarea) {
+        return;
+    }
+    let text_json = JSON.parse(btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("textarea")[0].textContent);
+    //赋值
+    for (let i in body_params) {
+        //TODO array or obeject 跳过
+        let name = body_params[i].name;
+        let value = body_params[i].value;
+        text_json[name] = value;
+    }
+    let text_str = JSON.stringify(text_json);
+    textarea.value = text_str;
+    textarea.innerHTML = text_str;
 }
 //填充url数据
-function fill_url_data(url_params) {
-
+//TODO优化
+function render_url_data(url_params, btn_ele) {
+    let inputs = btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("input");
+    //placeholder
+    for (let i in inputs) {
+        for (let x in url_params) {
+            if (url_params[x].name === inputs[i].placeholder) {
+                inputs[i].value = url_params[x].value;
+            }
+        }
+    }
 }
