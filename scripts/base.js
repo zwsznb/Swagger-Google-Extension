@@ -196,20 +196,18 @@ function create_btn(url) {
     btn.id = url;
     div.appendChild(btn);
     btn.onclick = function() {
-        console.log(get_swagger_param(this.id));
+        let assgined = call_chain(get_swagger_param(this.id));
+        //填充页面数据
+        console.log(assgined);
     }
     return div;
 }
 
-//TODO 根据参数列表模拟数据
-//TODO 定义类型映射
-//TODO 不同类型值的默认生成
-//先只支持处理string和int和double
-//TODO针对时间写一个生成器
-//数据结构在原来的基础上加上两个属性吧，is_set_value(是否赋值)，value(值)
-//TODO 写一个类似可以注册的参数模拟配置链
-for (let i in window) {
-    if (window[i] && window[i].name) {
-        //do something...
-    }
+//填充body数据
+function fill_body_data(url_params) {
+
+}
+//填充url数据
+function fill_url_data(url_params) {
+
 }

@@ -9,8 +9,11 @@
     },
     "content_scripts": [{
         "js": [
+            "scripts/mock.js",
+            "scripts/assigner.js",
+            "scripts/assigner_register.js",
             "scripts/axios.js",
-            "scripts/content.js"
+            "scripts/base.js"
         ],
         "runAt": "document_idle",
         "matches": [
