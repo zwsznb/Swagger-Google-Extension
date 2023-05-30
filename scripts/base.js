@@ -234,6 +234,9 @@ function render_body_data(body_params, btn_ele) {
     //赋值
     for (let i in body_params) {
         //TODO array or obeject 跳过
+        if (body_params[i].type === "object" || body_params[i].type === "array") {
+            continue;
+        }
         let name = body_params[i].name;
         let value = body_params[i].value;
         text_json[name] = value;
@@ -250,6 +253,9 @@ function render_url_data(url_params, btn_ele) {
     for (let i in inputs) {
         for (let x in url_params) {
             if (url_params[x].name === inputs[i].placeholder) {
+                if (url_params[x].type === "object" || url_params[x].type === "array") {
+                    continue;
+                }
                 inputs[i].value = url_params[x].value;
             }
         }
