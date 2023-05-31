@@ -1,7 +1,7 @@
-const swagger_pre_url = "/api/swagger/v1/swagger.json";
+const swagger_pre_url = "/swagger/v1/swagger.json";
 const local_save_key = "swagger_param";
 let swagger_json_path = location.origin + swagger_pre_url;
-http.get(swagger_json_path, function(err, result) {
+http.get(swagger_json_path, function (err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
     }
@@ -137,7 +137,7 @@ function get_request_method(paths, url) {
 let timer = null
 
 function interval(func, wait) {
-    let interv = function() {
+    let interv = function () {
         func.call(null);
         timer = setTimeout(interv, wait);
     };
@@ -160,8 +160,11 @@ interval(() => {
             if (document.getElementById(url)) {
                 continue;
             }
+            //TODO 检查
             if (is_have_param(url)) {
-                section.appendChild(create_btn(url));
+                if (section) {
+                    section.appendChild(create_btn(url));
+                }
             }
         }
     }
@@ -195,7 +198,7 @@ function create_btn(url) {
     btn.textContent = "mock";
     btn.id = url;
     div.appendChild(btn);
-    btn.onclick = function() {
+    btn.onclick = function () {
         let assgined = call_chain(get_swagger_param(this.id));
         //填充页面数据
         render_data(assgined, this);
@@ -245,7 +248,7 @@ function render_body_data(body_params, btn_ele) {
     let text_str = JSON.stringify(text_json);
     textarea.value = text_str;
     textarea.innerHTML = text_str;
-    simulation_keyboard(textarea);
+    simulation_keyboard(textarea, text_str, "text");
 }
 //填充url数据
 //TODO优化
@@ -259,39 +262,25 @@ function render_url_data(url_params, btn_ele) {
                     continue;
                 }
                 inputs[i].value = url_params[x].value;
-                simulation_keyboard(inputs[i]);
+                simulation_keyboard(inputs[i], url_params[x].value, "input");
             }
         }
     }
 }
 
-function simulation_keyboard(element) {
-    element.focus();
-    var KeyboardEventInit = {
-        isTrusted: true,
-        altKey: false,
-        bubbles: true,
-        cancelBubble: false,
-        cancelable: true,
-        charCode: 0,
-        code: "Space",
-        composed: true,
-        ctrlKey: false,
-        currentTarget: null,
-        defaultPrevented: false,
-        detail: 0,
-        eventPhase: 0,
-        isComposing: false,
-        key: " ",
-        keyCode: 32,
-        location: 0,
-        metaKey: false,
-        repeat: false,
-        returnValue: true,
-        shiftKey: false,
-        type: "keydown",
-        which: 32
-    };
-    var evtObj = new KeyboardEvent("keydown", KeyboardEventInit);
-    element.dispatchEvent(evtObj);
+//参考：https://stackoverflow.com/questions/23892547/what-is-the-best-way-to-trigger-change-or-input-event-in-react-js/46012210#46012210
+//yysy这是真nb
+function simulation_keyboard(element, value, type) {
+    var nativeInputValueSetter = null;
+    if (type === "text") {
+        nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+    }
+    if (type === "input") {
+        nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    }
+    if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(element, value);
+        var ev2 = new Event('input', { bubbles: true });
+        element.dispatchEvent(ev2);
+    }
 }

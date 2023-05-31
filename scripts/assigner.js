@@ -57,7 +57,7 @@ function page_assigner(url_and_params) {
 function id_assigner(url_and_params) {
     params_cycle(url_and_params, (params) => {
         if (params.name.includes("id")) {
-            params.value = Mock.mock('@guid');
+            params.value = Mock.mock('@guid()').toString();
             params.is_set_value = true;
         }
     })
