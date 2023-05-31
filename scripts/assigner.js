@@ -40,7 +40,7 @@ function date_time_assigner(url_and_params) {
 //分页参数赋值器
 function page_assigner(url_and_params) {
     params_cycle(url_and_params, (params) => {
-        if (params.name === "pageIndex") {
+        if (params.name.toLowerCase() === "pageIndex".toLowerCase()) {
             params.value = 1;
             params.is_set_value = true;
         }
@@ -54,7 +54,7 @@ function page_assigner(url_and_params) {
 //身份证赋值器
 function id_card_assigner(url_and_params) {
     params_cycle(url_and_params, (params) => {
-        if (params.name === "idsNo") {
+        if (params.name === "idsNo" || params.name === "IdsNo") {
             params.value = Mock.mock(/^[1-8]{2}[0-9]{4}[0-9]{4}((0[1-9]{1})|(1[0-2]{1}))((0[1-9]{1})|(1[0-9]{1})|(2[0-9]{1})|(3[0-1]{1}))[0-9]{3}[0-9xX]{1}$/);
             params.is_set_value = true;
         }
