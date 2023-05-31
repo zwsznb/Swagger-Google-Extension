@@ -243,10 +243,9 @@ function render_body_data(body_params, btn_ele) {
         text_json[name] = value;
     }
     let text_str = JSON.stringify(text_json);
-    // textarea.value = text_str;
-    // textarea.innerHTML = text_str;
-    textarea.focus();
-    simulation_keyboard(textarea, text_str);
+    textarea.value = text_str;
+    textarea.innerHTML = text_str;
+    simulation_keyboard(textarea);
 }
 //填充url数据
 //TODO优化
@@ -259,21 +258,40 @@ function render_url_data(url_params, btn_ele) {
                 if (url_params[x].type === "object" || url_params[x].type === "array") {
                     continue;
                 }
-                // inputs[i].value = url_params[x].value;
-                inputs[i].focus();
-                simulation_keyboard(inputs[i], url_params[x].value);
+                inputs[i].value = url_params[x].value;
+                simulation_keyboard(inputs[i]);
             }
         }
     }
 }
 
-function simulation_keyboard(ele, value) {
-    var evt = new InputEvent('input', {
-        inputType: 'insertText',
-        data: value,
-        dataTransfer: null,
-        isComposing: false
-    });
-    ele.value = value;
-    ele.dispatchEvent(evt);
+function simulation_keyboard(element) {
+    element.focus();
+    var KeyboardEventInit = {
+        isTrusted: true,
+        altKey: false,
+        bubbles: true,
+        cancelBubble: false,
+        cancelable: true,
+        charCode: 0,
+        code: "Space",
+        composed: true,
+        ctrlKey: false,
+        currentTarget: null,
+        defaultPrevented: false,
+        detail: 0,
+        eventPhase: 0,
+        isComposing: false,
+        key: " ",
+        keyCode: 32,
+        location: 0,
+        metaKey: false,
+        repeat: false,
+        returnValue: true,
+        shiftKey: false,
+        type: "keydown",
+        which: 32
+    };
+    var evtObj = new KeyboardEvent("keydown", KeyboardEventInit);
+    element.dispatchEvent(evtObj);
 }

@@ -15,9 +15,7 @@ function auto_assigner(url_and_params) {
                 }).number;
             }
             if (params.type === "string") {
-                params.value = Mock.mock({
-                    "string|1-8": "abce"
-                }).string;
+                params.value = Mock.mock('@word(5, 10)');
             }
             params.is_set_value = true;
         }
@@ -51,6 +49,26 @@ function page_assigner(url_and_params) {
             params.is_set_value = true;
         }
     });
+}
+
+//身份证赋值器
+function id_card_assigner(url_and_params) {
+    params_cycle(url_and_params, (params) => {
+        if (params.name === "idsNo") {
+            params.value = Mock.mock(/^[1-8]{2}[0-9]{4}[0-9]{4}((0[1-9]{1})|(1[0-2]{1}))((0[1-9]{1})|(1[0-9]{1})|(2[0-9]{1})|(3[0-1]{1}))[0-9]{3}[0-9xX]{1}$/);
+            params.is_set_value = true;
+        }
+    });
+}
+
+//手机号赋值器
+function phone_assigner(url_and_params) {
+    params_cycle(url_and_params, (params) => {
+        if (params.name.includes("phone") || params.name.includes("Phone")) {
+            params.value = Mock.mock(/^1[34578]\d{9}$/);
+            params.is_set_value = true;
+        }
+    })
 }
 
 function params_cycle(url_and_params, set_value_func) {
