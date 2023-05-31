@@ -12,7 +12,7 @@ function auto_assigner(url_and_params) {
             if (params.type === "integer" || params.type === "number") {
                 params.value = Mock.mock({
                     "number|1-100": 100
-                });
+                }).number;
             }
             if (params.type === "string") {
                 params.value = Mock.mock({
@@ -23,9 +23,9 @@ function auto_assigner(url_and_params) {
         }
     });
 }
+//TODO针对时间区间写一个生成器
 
 //时间赋值器,将时间设置为毫秒级的时间戳
-//TODO针对时间写一个生成器
 function date_time_assigner(url_and_params) {
     params_cycle(url_and_params, (params) => {
         let time = "Time";
@@ -42,11 +42,11 @@ function date_time_assigner(url_and_params) {
 //分页参数赋值器
 function page_assigner(url_and_params) {
     params_cycle(url_and_params, (params) => {
-        if (params.name === "PageIndex") {
+        if (params.name === "pageIndex") {
             params.value = 1;
             params.is_set_value = true;
         }
-        if (params.name === "PageSize") {
+        if (params.name === "pageSize") {
             params.value = 10;
             params.is_set_value = true;
         }

@@ -1,7 +1,7 @@
-const swagger_pre_url = "/swagger/v1/swagger.json";
+const swagger_pre_url = "/api/swagger/v1/swagger.json";
 const local_save_key = "swagger_param";
 let swagger_json_path = location.origin + swagger_pre_url;
-http.get(swagger_json_path, function (err, result) {
+http.get(swagger_json_path, function(err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
     }
@@ -137,7 +137,7 @@ function get_request_method(paths, url) {
 let timer = null
 
 function interval(func, wait) {
-    let interv = function () {
+    let interv = function() {
         func.call(null);
         timer = setTimeout(interv, wait);
     };
@@ -195,13 +195,14 @@ function create_btn(url) {
     btn.textContent = "mock";
     btn.id = url;
     div.appendChild(btn);
-    btn.onclick = function () {
+    btn.onclick = function() {
         let assgined = call_chain(get_swagger_param(this.id));
         //填充页面数据
         render_data(assgined, this);
     }
     return div;
 }
+
 function render_data(assgined_params, btn_ele) {
     let body_params = [];
     let url_params = [];
@@ -242,8 +243,10 @@ function render_body_data(body_params, btn_ele) {
         text_json[name] = value;
     }
     let text_str = JSON.stringify(text_json);
-    textarea.value = text_str;
-    textarea.innerHTML = text_str;
+    // textarea.value = text_str;
+    // textarea.innerHTML = text_str;
+    textarea.focus();
+    simulation_keyboard(textarea, text_str);
 }
 //填充url数据
 //TODO优化
@@ -256,8 +259,21 @@ function render_url_data(url_params, btn_ele) {
                 if (url_params[x].type === "object" || url_params[x].type === "array") {
                     continue;
                 }
-                inputs[i].value = url_params[x].value;
+                // inputs[i].value = url_params[x].value;
+                inputs[i].focus();
+                simulation_keyboard(inputs[i], url_params[x].value);
             }
         }
     }
+}
+
+function simulation_keyboard(ele, value) {
+    var evt = new InputEvent('input', {
+        inputType: 'insertText',
+        data: value,
+        dataTransfer: null,
+        isComposing: false
+    });
+    ele.value = value;
+    ele.dispatchEvent(evt);
 }
