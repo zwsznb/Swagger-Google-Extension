@@ -1,8 +1,4 @@
-//TODO 根据参数列表模拟数据
-//TODO 定义类型映射
-//TODO 不同类型值的默认生成
 //先只支持处理string和int和double
-
 // { url:/path,params:[{name:name,type:string,in:"query or body"}] }
 //数据结构在原来的基础上加上两个属性吧，is_set_value(是否赋值)，value(值)
 function auto_assigner(url_and_params) {
