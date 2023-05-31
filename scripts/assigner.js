@@ -44,12 +44,25 @@ function page_assigner(url_and_params) {
             params.value = 1;
             params.is_set_value = true;
         }
-        if (params.name === "pageSize") {
+        if (params.name.toLowerCase() === "pageSize".toLowerCase()) {
             params.value = 10;
             params.is_set_value = true;
         }
     });
 }
+
+
+
+//id赋值器
+function id_assigner(url_and_params) {
+    params_cycle(url_and_params, (params) => {
+        if (params.name.includes("id")) {
+            params.value = Mock.mock('@guid');
+            params.is_set_value = true;
+        }
+    })
+}
+
 
 //身份证赋值器
 function id_card_assigner(url_and_params) {
