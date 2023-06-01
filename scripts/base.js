@@ -1,12 +1,35 @@
-const swagger_pre_url = "/swagger/v1/swagger.json";
+// const swagger_pre_url = "/swagger/v1/swagger.json";
+// let swagger_json_path = location.origin + swagger_pre_url;
 const local_save_key = "swagger_param";
-let swagger_json_path = location.origin + swagger_pre_url;
-http.get(swagger_json_path, function (err, result) {
-    if (err) {
-        console.log("swagger json地址请求失败");
-    }
-    receive_paths(result.paths, result.components.schemas);
-});
+
+
+//TODO 看看有没有其他方案
+if (document.readyState !== 'complete') {
+    window.addEventListener('load', afterWindowLoaded);
+} else {
+    afterWindowLoaded();
+}
+
+function afterWindowLoaded() {
+    //Everything that needs to happen after the window is fully loaded.
+    setTimeout(() => {
+        let url = document.getElementsByTagName("hgroup")[0].getElementsByTagName("a")[0].href;
+        http.get(url, function (err, result) {
+            if (err) {
+                console.log("swagger json地址请求失败");
+            }
+            receive_paths(result.paths, result.components.schemas);
+        });
+    }, 200)
+}
+
+
+// http.get(swagger_json_path, function (err, result) {
+//     if (err) {
+//         console.log("swagger json地址请求失败");
+//     }
+//     receive_paths(result.paths, result.components.schemas);
+// });
 
 
 function receive_paths(paths, object_param) {

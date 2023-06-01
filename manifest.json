@@ -7,17 +7,19 @@
         "default_popup": "popup/hello.html",
         "default_icon": "images/hello_extensions.png"
     },
-    "content_scripts": [{
-        "js": [
-            "scripts/mock.js",
-            "scripts/assigner.js",
-            "scripts/assigner_register.js",
-            "scripts/axios.js",
-            "scripts/base.js"
-        ],
-        "runAt": "document_idle",
-        "matches": [
-            "http://*/*swagger/index.html"
-        ]
-    }]
+    "content_scripts": [
+        {
+            "js": [
+                "scripts/mock.js",
+                "scripts/assigner.js",
+                "scripts/assigner_register.js",
+                "scripts/axios.js",
+                "scripts/base.js"
+            ],
+            "runAt": "document_end",
+            "matches": [
+                "http://*/*swagger/index.html"
+            ]
+        }
+    ]
 }
