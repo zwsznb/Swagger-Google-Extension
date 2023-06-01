@@ -11,7 +11,12 @@ function auto_assigner(url_and_params) {
                 }).number;
             }
             if (params.type === "string") {
-                params.value = Mock.mock('@word(5, 10)');
+                params.value = Mock.mock('@word(3, 10)');
+            }
+            if (params.type === "boolean") {
+                params.value = Mock.mock({
+                    "boolean|1-2": true
+                }).boolean;
             }
             params.is_set_value = true;
         }

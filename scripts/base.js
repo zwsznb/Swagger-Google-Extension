@@ -246,23 +246,31 @@ function render_body_data(body_params, btn_ele) {
         text_json[name] = value;
     }
     let text_str = JSON.stringify(text_json, null, 4);
-    textarea.value = text_str;
-    textarea.innerHTML = text_str;
     simulation_keyboard(textarea, text_str, "text");
 }
 //填充url数据
 //TODO优化
 function render_url_data(url_params, btn_ele) {
-    let inputs = btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("input");
-    //placeholder
-    for (let i in inputs) {
-        for (let x in url_params) {
-            if (url_params[x].name === inputs[i].placeholder) {
-                if (url_params[x].type === "object" || url_params[x].type === "array") {
-                    continue;
+    let tr = btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("tr");
+    for (let i in tr) {
+        if (tr[i].getAttribute && tr[i].getAttribute("data-param-name")) {
+            for (let x in url_params) {
+                if (url_params[x].name === tr[i].getAttribute("data-param-name")) {
+                    if (url_params[x].type === "object" || url_params[x].type === "array") {
+                        continue;
+                    }
+                    let input_type = ""
+                    let ele = null;
+                    if (tr[i].getElementsByTagName("input").length > 0) {
+                        input_type = "input";
+                        ele = tr[i].getElementsByTagName("input")[0];
+                    }
+                    if (tr[i].getElementsByTagName("select").length > 0) {
+                        input_type = "select";
+                        ele = tr[i].getElementsByTagName("select")[0];
+                    }
+                    simulation_keyboard(ele, url_params[x].value, input_type);
                 }
-                inputs[i].value = url_params[x].value;
-                simulation_keyboard(inputs[i], url_params[x].value, "input");
             }
         }
     }
@@ -278,9 +286,18 @@ function simulation_keyboard(element, value, type) {
     if (type === "input") {
         nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
     }
+    if (type === "select") {
+        nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
+    }
     if (nativeInputValueSetter) {
         nativeInputValueSetter.call(element, value);
-        var ev2 = new Event('input', { bubbles: true });
+        var ev2 = null;
+        if (type === "select") {
+            ev2 = new Event('change', { bubbles: true });
+        }
+        if (type === "input" || type === "text") {
+            ev2 = new Event('input', { bubbles: true });
+        }
         element.dispatchEvent(ev2);
     }
 }
