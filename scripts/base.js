@@ -1,7 +1,7 @@
-const swagger_pre_url = "/api/swagger/v1/swagger.json";
+const swagger_pre_url = "/swagger/v1/swagger.json";
 const local_save_key = "swagger_param";
 let swagger_json_path = location.origin + swagger_pre_url;
-http.get(swagger_json_path, function(err, result) {
+http.get(swagger_json_path, function (err, result) {
     if (err) {
         console.log("swagger json地址请求失败");
     }
@@ -59,10 +59,7 @@ function handle_param(url, paths, schemas) {
 function handle_request_param(param_source, schemas) {
     let url_param = handle_url_param(param_source);
     let body_param = handle_body_param(param_source, schemas);
-    //合并 
-    //TODO 可能会有问题，得留意，没有考虑到对象类型的参数
-    // let params = {};
-    // Object.assign(params, url_param, body_param);
+    //合并
     return [...url_param, ...body_param];
 }
 //处理url上的参数
@@ -137,7 +134,7 @@ function get_request_method(paths, url) {
 let timer = null
 
 function interval(func, wait) {
-    let interv = function() {
+    let interv = function () {
         func.call(null);
         timer = setTimeout(interv, wait);
     };
@@ -198,7 +195,7 @@ function create_btn(url) {
     btn.textContent = "mock";
     btn.id = url;
     div.appendChild(btn);
-    btn.onclick = function() {
+    btn.onclick = function () {
         let assgined = call_chain(get_swagger_param(this.id));
         //填充页面数据
         render_data(assgined, this);
