@@ -1,6 +1,7 @@
 //先只支持处理string和int和double
 // { url:/path,params:[{name:name,type:string,in:"query or body"}] }
 //数据结构在原来的基础上加上两个属性吧，is_set_value(是否赋值)，value(值)
+//TODO 整理，将mock数据分离到mock_data.js文件中
 function auto_assigner(url_and_params) {
     params_cycle(url_and_params, (params) => {
         if (!params.is_set_value) {
