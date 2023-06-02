@@ -27,7 +27,7 @@ function auto_assigner(url_and_params) {
                             Mock.mock('@word(3, 10)'),
                             Mock.mock('@word(3, 10)')
                         ]
-                    }).array
+                    }).array;
                 }
             }
             params.is_set_value = true;

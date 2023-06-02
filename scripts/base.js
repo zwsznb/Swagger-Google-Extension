@@ -14,7 +14,7 @@ function afterWindowLoaded() {
     //Everything that needs to happen after the window is fully loaded.
     setTimeout(() => {
         let url = document.getElementsByTagName("hgroup")[0].getElementsByTagName("a")[0].href;
-        http.get(url, function(err, result) {
+        http.get(url, function (err, result) {
             if (err) {
                 console.log("swagger json地址请求失败");
             }
@@ -166,7 +166,7 @@ function get_request_method(paths, url) {
 let timer = null
 
 function interval(func, wait) {
-    let interv = function() {
+    let interv = function () {
         func.call(null);
         timer = setTimeout(interv, wait);
     };
@@ -227,7 +227,7 @@ function create_btn(url) {
     btn.textContent = "mock";
     btn.id = url;
     div.appendChild(btn);
-    btn.onclick = function() {
+    btn.onclick = function () {
         let assgined = call_chain(get_swagger_param(this.id));
         //填充页面数据
         render_data(assgined, this);
@@ -315,17 +315,16 @@ function render_url_data(url_params, btn_ele) {
 
 //TODO 渲染url中的array参数
 function render_url_arr_data(tr, value) {
-    let btn = tr.getElementsByTagName("button")[0];
+    let btns = tr.getElementsByTagName("button");
+    let last_btn = btns[btns.length - 1];
     let remove_input = tr.getElementsByClassName("btn btn-sm json-schema-form-item-remove null button");
     //先清掉输入框
-    if (remove_input && remove_input.length > 0) {
-        for (let i = 0; i < remove_input; i++) {
-            remove_input[i].click();
-        }
+    while (remove_input.length > 0) {
+        remove_input[0].click();
     }
     for (let i = 0; i < value.length; i++) {
         //点击按钮添加输入框
-        btn.click();
+        last_btn.click();
         let input = tr.getElementsByTagName("input")[i];
         simulation_keyboard(input, value[i], "input");
     }
