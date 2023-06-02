@@ -14,13 +14,13 @@ function afterWindowLoaded() {
     //Everything that needs to happen after the window is fully loaded.
     setTimeout(() => {
         let url = document.getElementsByTagName("hgroup")[0].getElementsByTagName("a")[0].href;
-        http.get(url, function (err, result) {
+        http.get(url, function(err, result) {
             if (err) {
                 console.log("swagger json地址请求失败");
             }
             receive_paths(result.paths, result.components.schemas);
         });
-    }, 200)
+    }, 1000)
 }
 
 
@@ -157,7 +157,7 @@ function get_request_method(paths, url) {
 let timer = null
 
 function interval(func, wait) {
-    let interv = function () {
+    let interv = function() {
         func.call(null);
         timer = setTimeout(interv, wait);
     };
@@ -218,7 +218,7 @@ function create_btn(url) {
     btn.textContent = "mock";
     btn.id = url;
     div.appendChild(btn);
-    btn.onclick = function () {
+    btn.onclick = function() {
         let assgined = call_chain(get_swagger_param(this.id));
         //填充页面数据
         render_data(assgined, this);
