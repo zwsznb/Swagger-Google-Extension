@@ -20,7 +20,7 @@ function afterWindowLoaded() {
             }
             receive_paths(result.paths, result.components.schemas);
         });
-    }, 1000)
+    }, 2000)
 }
 
 
@@ -93,11 +93,15 @@ function handle_url_param(param_source) {
     }
     let params = param_source.parameters;
     for (let param in params) {
+        //如果是array类型数组，object肯定是不可能在这出现
         let url_param = {
             name: params[param].name,
             in: params[param].in,
             type: params[param].schema.type
         };
+        if (params[param].schema.type === "array") {
+            url_param.items_type = params[param].schema.items.type;
+        }
         if (!url_param.name) {
             continue;
         }
@@ -135,6 +139,11 @@ function handle_body_param(param_source, schemas) {
             in: "body",
             type: properties[param_name].type
         };
+        if (properties[param_name].type === "array") {
+            body_param.items_type = properties[param_name].items.type;
+        }
+        //TODO 如果参数类型是object,或者array[object],不过感觉参数不应该这么复杂
+        // if (properties[param_name].type === "object") { }
         if (!body_param.name) {
             continue;
         }
@@ -257,8 +266,8 @@ function render_body_data(body_params, btn_ele) {
     let text_json = JSON.parse(btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("textarea")[0].textContent);
     //赋值
     for (let i in body_params) {
-        //TODO array or obeject 跳过
-        if (body_params[i].type === "object" || body_params[i].type === "array") {
+        //TODO object 跳过
+        if (body_params[i].type === "object") {
             continue;
         }
         let name = body_params[i].name;
@@ -268,6 +277,9 @@ function render_body_data(body_params, btn_ele) {
     let text_str = JSON.stringify(text_json, null, 4);
     simulation_keyboard(textarea, text_str, "text");
 }
+
+
+
 //填充url数据
 //TODO优化
 function render_url_data(url_params, btn_ele) {
@@ -276,25 +288,51 @@ function render_url_data(url_params, btn_ele) {
         if (tr[i].getAttribute && tr[i].getAttribute("data-param-name")) {
             for (let x in url_params) {
                 if (url_params[x].name === tr[i].getAttribute("data-param-name")) {
-                    if (url_params[x].type === "object" || url_params[x].type === "array") {
+                    if (url_params[x].type === "object") {
                         continue;
                     }
                     let input_type = ""
-                    let ele = null;
-                    if (tr[i].getElementsByTagName("input").length > 0) {
-                        input_type = "input";
-                        ele = tr[i].getElementsByTagName("input")[0];
+                    if (url_params[x].type === "array") {
+                        render_url_arr_data(tr[i], url_params[x].value);
+                    } else {
+                        let ele = null;
+                        if (tr[i].getElementsByTagName("input").length > 0) {
+                            input_type = "input";
+                            ele = tr[i].getElementsByTagName("input")[0];
+                        }
+                        if (tr[i].getElementsByTagName("select").length > 0) {
+                            input_type = "select";
+                            ele = tr[i].getElementsByTagName("select")[0];
+                        }
+                        simulation_keyboard(ele, url_params[x].value, input_type);
                     }
-                    if (tr[i].getElementsByTagName("select").length > 0) {
-                        input_type = "select";
-                        ele = tr[i].getElementsByTagName("select")[0];
-                    }
-                    simulation_keyboard(ele, url_params[x].value, input_type);
+
                 }
             }
         }
     }
 }
+
+//TODO 渲染url中的array参数
+function render_url_arr_data(tr, value) {
+    let btn = tr.getElementsByTagName("button")[0];
+    let remove_input = tr.getElementsByClassName("btn btn-sm json-schema-form-item-remove null button");
+    //先清掉输入框
+    if (remove_input && remove_input.length > 0) {
+        for (let i = 0; i < remove_input; i++) {
+            remove_input[i].click();
+        }
+    }
+    for (let i = 0; i < value.length; i++) {
+        //点击按钮添加输入框
+        btn.click();
+        let input = tr.getElementsByTagName("input")[i];
+        simulation_keyboard(input, value[i], "input");
+    }
+}
+
+
+
 
 //参考：https://stackoverflow.com/questions/23892547/what-is-the-best-way-to-trigger-change-or-input-event-in-react-js/46012210#46012210
 //yysy这是真nb
@@ -309,7 +347,7 @@ function simulation_keyboard(element, value, type) {
     if (type === "select") {
         nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
     }
-    if (nativeInputValueSetter) {
+    if (nativeInputValueSetter && element) {
         nativeInputValueSetter.call(element, value);
         var ev2 = null;
         if (type === "select") {

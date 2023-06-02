@@ -19,6 +19,17 @@ function auto_assigner(url_and_params) {
                     "boolean|1-2": true
                 }).boolean;
             }
+            if (params.type === "array") {
+                if (params.items_type === "string") {
+                    params.value = Mock.mock({
+                        "array|2-5": [
+                            Mock.mock('@word(3, 10)'),
+                            Mock.mock('@word(3, 10)'),
+                            Mock.mock('@word(3, 10)')
+                        ]
+                    }).array
+                }
+            }
             params.is_set_value = true;
         }
     });
