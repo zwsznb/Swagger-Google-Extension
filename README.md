@@ -10,15 +10,19 @@
 
 ### 文件目录
 
-![1685773434436](/images/1685773434436.jpg)
+![1685848071467](/images/1685848071467.jpg)
 
 > 文件说明
 >
 > mock.js：主要用于生成模拟数据的js文件，可以从官网直接下载
 >
+> mock_data.js：mock模拟数据的简单封装
+>
 > axios.js：网络请求封装函数
 >
-> assigner.js： 一些赋值器，函数形式编写，都已assigner结尾，方便获取并循环调用，用来给请求的参数进行赋值
+> extend_assigner.js： 扩展赋值器，用于写自定义赋值器，函数形式编写，都已assigner结尾，方便获取并循环调用，用来给请求的参数进行赋值
+>
+> internally_assigner.js：内置赋值器，当是默认的赋值器吧，函数形式编写，都已assigner结尾，方便获取并循环调用，用来给请求的参数进行赋值
 >
 > assigner_register.js：赋值器注册，使用window[assigner_name]的形式获取所有的赋值器，并调用
 >
@@ -39,8 +43,8 @@
 //id赋值器，自定义
 function id_assigner(url_and_params) {
     params_cycle(url_and_params, (params) => {
-        if (params.name.includes("id")) {
-            params.value = Mock.mock('@guid()').toString();
+        if (params.name.toLowerCase().includes("id")) {
+            params.value = mock_guid();
             params.is_set_value = true;
         }
     })
@@ -51,27 +55,17 @@ function auto_assigner(url_and_params) {
         if (!params.is_set_value) {
             //integer or number
             if (params.type === "integer" || params.type === "number") {
-                params.value = Mock.mock({
-                    "number|1-100": 100
-                }).number;
+                params.value = mock_number(1, 100);
             }
             if (params.type === "string") {
-                params.value = Mock.mock('@word(3, 10)');
+                params.value = mock_string(3, 10);
             }
             if (params.type === "boolean") {
-                params.value = Mock.mock({
-                    "boolean|1-2": true
-                }).boolean;
+                params.value = mock_bool();
             }
             if (params.type === "array") {
                 if (params.items_type === "string") {
-                    params.value = Mock.mock({
-                        "array|2-5": [
-                            Mock.mock('@word(3, 10)'),
-                            Mock.mock('@word(3, 10)'),
-                            Mock.mock('@word(3, 10)')
-                        ]
-                    }).array;
+                    params.value = mock_array();
                 }
             }
             params.is_set_value = true;
@@ -106,7 +100,7 @@ function auto_assigner(url_and_params) {
 - [x] 整理，将mock数据分离到mock_data.js文件中
 - [x] 调整优化考虑，用url作为可以key保存参数数组{url:{ url:/path,params:[{name:name,type:string,in:"query or body"}] }}
 - [x] 添加必填项属性
-- [ ] 分离赋值器，分成一个内部，和一个外部，内部默认，外部可用来扩展
+- [x] 分离赋值器，分成一个内部，和一个外部，内部默认，外部可用来扩展
 - [ ] 根据添加的数据过滤，不进行模拟数据，在侧边搞一个输入框，或者利用popup设计一个弹框输入json，利用json来控制模拟数据
 - [ ] 手动选择参数的模拟长度等
 - [ ] 根据参数列表随机设置值和不设置值
