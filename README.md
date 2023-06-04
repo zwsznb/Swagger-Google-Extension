@@ -104,13 +104,12 @@ function auto_assigner(url_and_params) {
 - [ ] 页面设计，比如可编辑数据的模拟配置
 - [x] 时间参数转换为时间戳
 - [x] 给array类型写个赋值器
-- [ ] 没有考虑到对象类型的参数
 - [ ] 添加必填项属性
 - [ ] 根据添加的数据过滤，不进行模拟数据，在侧边搞一个输入框，或者利用popup设计一个弹框输入json，利用json来控制模拟数据
 - [ ] 手动选择参数的模拟长度等
 - [ ] 根据参数列表随机设置值和不设置值
 - [x] 整理，将mock数据分离到mock_data.js文件中
-- [ ] 调整优化考虑，用url作为可以key保存参数数组{url:{ url:/path,params:[{name:name,type:string,in:"query or body"}] }}
+- [x] 调整优化考虑，用url作为可以key保存参数数组{url:{ url:/path,params:[{name:name,type:string,in:"query or body"}] }}
 - [ ] 分离赋值器，分成一个内部，和一个外部，内部默认，外部可用来扩展
 - [ ] url和body双合一请求处理(这个不搞了，不科学)
 - [ ] 文件上传请求(可能就不做了)

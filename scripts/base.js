@@ -33,14 +33,19 @@ function afterWindowLoaded() {
 
 
 function receive_paths(paths, object_param) {
-    let url_param_map = [];
+    // let url_param_map = [];
+    let url_param_map = {};
     for (let url in paths) {
         let url_node = null;
         url_node = handle_param(url, paths, object_param);
-        url_param_map.push({
+        // url_param_map.push({
+        //     url: url,
+        //     params: url_node
+        // });
+        url_param_map[url] = {
             url: url,
             params: url_node
-        });
+        };
     }
     //保存到本地缓存，或者其它地方,
     //TODO如果保存的大小有限，可以考虑不保存没有输入参数的请求
@@ -111,13 +116,12 @@ function handle_url_param(param_source) {
 }
 //post的object参数在components-schemas
 //如果是单个参数会放到paths-parameter里面，默认url的参数，不考虑
-//TODO 没有判断对象的类型，这里默认就是object
 function handle_body_param(param_source, schemas) {
     if (!param_source.requestBody) {
         return [];
     }
     //TODO 看看要不要改
-    //TODO 文件上传忽略
+    //文件上传忽略
     if (param_source.requestBody.content["multipart/form-data"]) {
         return [];
     }
@@ -202,12 +206,13 @@ interval(() => {
 function get_swagger_param(url) {
     let local_data = localStorage.getItem(local_save_key);
     let format_data = JSON.parse(local_data);
-    let data = null;
-    format_data.forEach(element => {
-        if (element.url === url) {
-            data = element;
-        }
-    });
+    // let data = null;
+    // format_data.forEach(element => {
+    //     if (element.url === url) {
+    //         data = element;
+    //     }
+    // });
+    let data = format_data[url];
     return data;
 }
 
@@ -239,6 +244,7 @@ function render_data(assgined_params, btn_ele) {
     let body_params = [];
     let url_params = [];
     let params = assgined_params.params;
+    //参数分类
     for (let i in params) {
         if (params[i].in === "body") {
             body_params.push(params[i]);
@@ -281,41 +287,44 @@ function render_body_data(body_params, btn_ele) {
 
 
 //填充url数据
-//TODO优化
 function render_url_data(url_params, btn_ele) {
     let tr = btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("tr");
+    let params_map = new Map();
+    for (let x in url_params) {
+        params_map.set(url_params[x].name, url_params[x])
+    }
     for (let i in tr) {
         if (tr[i].getAttribute && tr[i].getAttribute("data-param-name")) {
-            for (let x in url_params) {
-                if (url_params[x].name === tr[i].getAttribute("data-param-name")) {
-                    if (url_params[x].type === "object") {
-                        continue;
+            let param_name = tr[i].getAttribute("data-param-name");
+            let param = params_map.get(param_name);
+            if (param) {
+                if (param.type === "object") {
+                    continue;
+                }
+                let input_type = ""
+                if (param.type === "array") {
+                    render_url_arr_data(tr[i], param.value);
+                } else {
+                    let ele = null;
+                    if (tr[i].getElementsByTagName("input").length > 0) {
+                        input_type = "input";
+                        ele = tr[i].getElementsByTagName("input")[0];
                     }
-                    let input_type = ""
-                    if (url_params[x].type === "array") {
-                        render_url_arr_data(tr[i], url_params[x].value);
-                    } else {
-                        let ele = null;
-                        if (tr[i].getElementsByTagName("input").length > 0) {
-                            input_type = "input";
-                            ele = tr[i].getElementsByTagName("input")[0];
-                        }
-                        if (tr[i].getElementsByTagName("select").length > 0) {
-                            input_type = "select";
-                            ele = tr[i].getElementsByTagName("select")[0];
-                        }
-                        simulation_keyboard(ele, url_params[x].value, input_type);
+                    if (tr[i].getElementsByTagName("select").length > 0) {
+                        input_type = "select";
+                        ele = tr[i].getElementsByTagName("select")[0];
                     }
-
+                    simulation_keyboard(ele, param.value, input_type);
                 }
             }
         }
     }
 }
 
-//TODO 渲染url中的array参数
+//渲染url中的array参数
 function render_url_arr_data(tr, value) {
     let btns = tr.getElementsByTagName("button");
+    //选择最后一个添加按钮
     let last_btn = btns[btns.length - 1];
     let remove_input = tr.getElementsByClassName("btn btn-sm json-schema-form-item-remove null button");
     //先清掉输入框
