@@ -33,15 +33,10 @@ function afterWindowLoaded() {
 
 
 function receive_paths(paths, object_param) {
-    // let url_param_map = [];
     let url_param_map = {};
     for (let url in paths) {
         let url_node = null;
         url_node = handle_param(url, paths, object_param);
-        // url_param_map.push({
-        //     url: url,
-        //     params: url_node
-        // });
         url_param_map[url] = {
             url: url,
             params: url_node
@@ -206,12 +201,6 @@ interval(() => {
 function get_swagger_param(url) {
     let local_data = localStorage.getItem(local_save_key);
     let format_data = JSON.parse(local_data);
-    // let data = null;
-    // format_data.forEach(element => {
-    //     if (element.url === url) {
-    //         data = element;
-    //     }
-    // });
     let data = format_data[url];
     return data;
 }
