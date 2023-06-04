@@ -1,28 +1,6 @@
 //先只支持处理string和int和double
 // { url:/path,params:[{name:name,type:string,in:"query or body"}] }
 //数据结构在原来的基础上加上两个属性吧，is_set_value(是否赋值)，value(值)
-function auto_assigner(url_and_params) {
-    params_cycle(url_and_params, (params) => {
-        if (!params.is_set_value) {
-            //integer or number
-            if (params.type === "integer" || params.type === "number") {
-                params.value = mock_number(1, 100);
-            }
-            if (params.type === "string") {
-                params.value = mock_string(3, 10);
-            }
-            if (params.type === "boolean") {
-                params.value = mock_bool();
-            }
-            if (params.type === "array") {
-                if (params.items_type === "string") {
-                    params.value = mock_array();
-                }
-            }
-            params.is_set_value = true;
-        }
-    });
-}
 //TODO针对时间区间写一个生成器
 
 //时间赋值器,将时间设置为毫秒级的时间戳

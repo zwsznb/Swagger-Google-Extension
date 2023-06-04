@@ -12,7 +12,8 @@
             "js": [
                 "scripts/mock.js",
                 "scripts/mock_data.js",
-                "scripts/assigner.js",
+                "scripts/internally_assigner.js",
+                "scripts/extend_assigner.js",
                 "scripts/assigner_register.js",
                 "scripts/axios.js",
                 "scripts/base.js"
