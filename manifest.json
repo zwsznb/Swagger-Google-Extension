@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
-    "name": "Hello Extensions",
-    "description": "Base Level Extension",
+    "name": "Swagger Extensions",
+    "description": "Use mock to build parameters",
     "version": "1.0",
     "action": {
         "default_popup": "popup/hello.html",
