@@ -194,7 +194,6 @@ interval(() => {
             if (document.getElementById(url)) {
                 continue;
             }
-            //TODO 检查
             if (is_have_param(url)) {
                 if (section) {
                     section.appendChild(create_btn(url));
