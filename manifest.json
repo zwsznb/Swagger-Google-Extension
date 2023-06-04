@@ -11,6 +11,7 @@
         {
             "js": [
                 "scripts/mock.js",
+                "scripts/mock_data.js",
                 "scripts/assigner.js",
                 "scripts/assigner_register.js",
                 "scripts/axios.js",
