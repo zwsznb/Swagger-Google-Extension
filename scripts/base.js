@@ -130,11 +130,7 @@ function handle_body_param(param_source, schemas) {
         return [];
     }
     let temp_arr = body_dto.split("/");
-    //TODO 忘了怎么改了
-    let dto_name = "";
-    for (let index in temp_arr) {
-        dto_name = temp_arr[index];
-    }
+    let dto_name = temp_arr[temp_arr.length - 1];
     let properties = schemas[dto_name].properties;
     let required_arr = schemas[dto_name].required;
     let body_params = [];
@@ -148,7 +144,7 @@ function handle_body_param(param_source, schemas) {
             body_param.items_type = properties[param_name].items.type;
         }
         //添加必填属性
-        if(required_arr){
+        if (required_arr) {
             body_param.required = required_arr.includes(param_name);
         }
         //TODO 如果参数类型是object,或者array[object],不过感觉参数不应该这么复杂
