@@ -101,15 +101,15 @@ function auto_assigner(url_and_params) {
 
 - [x] 请求swagger json，并格式化
 - [x] mock.js导入，并根据json的接口参数和类型模拟数据
-- [ ] 页面设计，比如可编辑数据的模拟配置
 - [x] 时间参数转换为时间戳
 - [x] 给array类型写个赋值器
-- [ ] 添加必填项属性
+- [x] 整理，将mock数据分离到mock_data.js文件中
+- [x] 调整优化考虑，用url作为可以key保存参数数组{url:{ url:/path,params:[{name:name,type:string,in:"query or body"}] }}
+- [x] 添加必填项属性
+- [ ] 分离赋值器，分成一个内部，和一个外部，内部默认，外部可用来扩展
 - [ ] 根据添加的数据过滤，不进行模拟数据，在侧边搞一个输入框，或者利用popup设计一个弹框输入json，利用json来控制模拟数据
 - [ ] 手动选择参数的模拟长度等
 - [ ] 根据参数列表随机设置值和不设置值
-- [x] 整理，将mock数据分离到mock_data.js文件中
-- [x] 调整优化考虑，用url作为可以key保存参数数组{url:{ url:/path,params:[{name:name,type:string,in:"query or body"}] }}
-- [ ] 分离赋值器，分成一个内部，和一个外部，内部默认，外部可用来扩展
+- [ ] 页面设计，比如可编辑数据的模拟配置
 - [ ] url和body双合一请求处理(这个不搞了，不科学)
 - [ ] 文件上传请求(可能就不做了)

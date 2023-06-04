@@ -47,6 +47,7 @@ function receive_paths(paths, object_param) {
     save(url_param_map);
 }
 
+//保存localStorage
 function save(url_param_map) {
     let save_str = JSON.stringify(url_param_map);
     localStorage.setItem(local_save_key, save_str);
@@ -102,6 +103,10 @@ function handle_url_param(param_source) {
         if (params[param].schema.type === "array") {
             url_param.items_type = params[param].schema.items.type;
         }
+        //添加必填属性
+        if (params[param].required) {
+            url_param.required = true;
+        }
         if (!url_param.name) {
             continue;
         }
@@ -131,6 +136,7 @@ function handle_body_param(param_source, schemas) {
         dto_name = temp_arr[index];
     }
     let properties = schemas[dto_name].properties;
+    let required_arr = schemas[dto_name].required;
     let body_params = [];
     for (let param_name in properties) {
         let body_param = {
@@ -140,6 +146,10 @@ function handle_body_param(param_source, schemas) {
         };
         if (properties[param_name].type === "array") {
             body_param.items_type = properties[param_name].items.type;
+        }
+        //添加必填属性
+        if(required_arr){
+            body_param.required = required_arr.includes(param_name);
         }
         //TODO 如果参数类型是object,或者array[object],不过感觉参数不应该这么复杂
         // if (properties[param_name].type === "object") { }
