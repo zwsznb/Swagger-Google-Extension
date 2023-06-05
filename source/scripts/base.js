@@ -33,20 +33,22 @@ function afterWindowLoaded() {
 
 
 function receive_paths(paths, object_param) {
-    let url_param_map = [];
+    let url_param_map = {};
     for (let url in paths) {
         let url_node = null;
         url_node = handle_param(url, paths, object_param);
-        url_param_map.push({
+        url_param_map[url] = {
             url: url,
             params: url_node
-        });
+        };
     }
+    console.log(url_param_map);
     //保存到本地缓存，或者其它地方,
     //TODO如果保存的大小有限，可以考虑不保存没有输入参数的请求
     save(url_param_map);
 }
 
+//保存localStorage
 function save(url_param_map) {
     let save_str = JSON.stringify(url_param_map);
     localStorage.setItem(local_save_key, save_str);
@@ -102,6 +104,10 @@ function handle_url_param(param_source) {
         if (params[param].schema.type === "array") {
             url_param.items_type = params[param].schema.items.type;
         }
+        //添加必填属性
+        if (params[param].required) {
+            url_param.required = true;
+        }
         if (!url_param.name) {
             continue;
         }
@@ -111,27 +117,24 @@ function handle_url_param(param_source) {
 }
 //post的object参数在components-schemas
 //如果是单个参数会放到paths-parameter里面，默认url的参数，不考虑
-//TODO 没有判断对象的类型，这里默认就是object
+//TODO 文件表单上传，文件表单上传一定是放在body里面的
 function handle_body_param(param_source, schemas) {
     if (!param_source.requestBody) {
         return [];
     }
     //TODO 看看要不要改
-    //TODO 文件上传忽略
+    //表单上传参数获取
     if (param_source.requestBody.content["multipart/form-data"]) {
-        return [];
+        return handle_form_data(param_source.requestBody.content["multipart/form-data"]);
     }
     let body_dto = param_source.requestBody.content["application/json"]["schema"]["$ref"];
     if (!body_dto) {
         return [];
     }
     let temp_arr = body_dto.split("/");
-    //TODO 忘了怎么改了
-    let dto_name = "";
-    for (let index in temp_arr) {
-        dto_name = temp_arr[index];
-    }
+    let dto_name = temp_arr[temp_arr.length - 1];
     let properties = schemas[dto_name].properties;
+    let required_arr = schemas[dto_name].required;
     let body_params = [];
     for (let param_name in properties) {
         let body_param = {
@@ -142,6 +145,10 @@ function handle_body_param(param_source, schemas) {
         if (properties[param_name].type === "array") {
             body_param.items_type = properties[param_name].items.type;
         }
+        //添加必填属性
+        if (required_arr) {
+            body_param.required = required_arr.includes(param_name);
+        }
         //TODO 如果参数类型是object,或者array[object],不过感觉参数不应该这么复杂
         // if (properties[param_name].type === "object") { }
         if (!body_param.name) {
@@ -150,6 +157,33 @@ function handle_body_param(param_source, schemas) {
         body_params.push(body_param);
     }
     return body_params;
+}
+//TODO优化整合
+function handle_form_data(form_data) {
+    let form = [];
+    let properties = form_data.schema.properties;
+    let required_data = form_data.schema.required;
+    for (let i in properties) {
+        let form_param = {
+            name: i,
+            in: "body",
+            type: properties[i].type
+        };
+        //单文件
+        if (properties[i].format === "binary") {
+            form_param.type = "file";
+        }
+        //多文件
+        if (properties[i].type === "array" && properties[i].items.format === "binary") {
+            form_param.items_type = "file";
+        }
+        //是否必须
+        if (required_data && required_data.includes(i)) {
+            form_param.required = true;
+        }
+        form.push(form_param);
+    }
+    return form;
 }
 
 function get_request_method(paths, url) {
@@ -189,7 +223,6 @@ interval(() => {
             if (document.getElementById(url)) {
                 continue;
             }
-            //TODO 检查
             if (is_have_param(url)) {
                 if (section) {
                     section.appendChild(create_btn(url));
@@ -202,12 +235,7 @@ interval(() => {
 function get_swagger_param(url) {
     let local_data = localStorage.getItem(local_save_key);
     let format_data = JSON.parse(local_data);
-    let data = null;
-    format_data.forEach(element => {
-        if (element.url === url) {
-            data = element;
-        }
-    });
+    let data = format_data[url];
     return data;
 }
 
@@ -239,6 +267,7 @@ function render_data(assgined_params, btn_ele) {
     let body_params = [];
     let url_params = [];
     let params = assgined_params.params;
+    //参数分类
     for (let i in params) {
         if (params[i].in === "body") {
             body_params.push(params[i]);
@@ -248,7 +277,13 @@ function render_data(assgined_params, btn_ele) {
         }
     }
     if (body_params.length !== 0) {
+        //表单文件参数
+        if (has_file_param(body_params)) {
+            render_form_data(body_params, btn_ele);
+            return;
+        }
         render_body_data(body_params, btn_ele);
+        //是否是包含文件参数
     }
     if (url_params.length !== 0) {
         render_url_data(url_params, btn_ele);
@@ -278,44 +313,113 @@ function render_body_data(body_params, btn_ele) {
     simulation_keyboard(textarea, text_str, "text");
 }
 
+function render_form_data(url_params, btn_ele) {
+    //data-property-name
+    let trs = btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("tr");
+    let map = new Map();
+    for (let i in url_params) {
+        map.set(url_params[i].name, url_params[i]);
+    }
+    for (let i in trs) {
+        if (!trs[i].getAttribute) {
+            continue;
+        }
+        let param_name = trs[i].getAttribute("data-property-name");
+        if (param_name) {
+            let param = map.get(param_name);
+            if (param.type !== "file" && param.type !== "array") {
+                simulation_keyboard(trs[i].getElementsByTagName("input")[0], param.value, "input");
+                continue;
+            }
+            //单文件
+            if (param.type === "file") {
+                render_file_param(param.value, trs[i]);
+                continue;
+            }
+            if (param.type === "array" && param.items_type && param.items_type === "string") {
+                render_url_arr_data(trs[i], param.value);
+                continue;
+            }
+            //多文件
+            if (param.type === "array" && param.items_type && param.items_type === "file") {
+                continue;
+            }
+        }
+    }
+}
+//https://pqina.nl/blog/set-value-to-file-input/
+//TODO 渲染问题
+function render_file_param(url, tr) {
+    let input = tr.getElementsByTagName("input")[0];
+    getBase64ByImgUrl(url, function (dataURL) {
+        //传入base64数据和文件名字
+        var fileFlow = getFileByBase64(dataURL, 'imgName-' + (new Date()).getTime());
+        console.log('fileFlow: ', fileFlow);
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(fileFlow);
+        input.files = dataTransfer.files;
+        // Help Safari out
+        if (input.webkitEntries.length) {
+            input.dataset.file = `${dataTransfer.files[0].name}`;
+        }
+    })
+}
+//TODO 多文件
+function render_file_params(url, tr) {
+
+}
+
+function has_file_param(params) {
+    let has_file = false;
+    for (let i in params) {
+        if (params[i].type === "file") {
+            has_file = true;
+            break;
+        }
+    }
+    return has_file;
+}
 
 
 //填充url数据
-//TODO优化
 function render_url_data(url_params, btn_ele) {
     let tr = btn_ele.parentNode.parentNode.parentNode.getElementsByTagName("tr");
+    let params_map = new Map();
+    for (let x in url_params) {
+        params_map.set(url_params[x].name, url_params[x])
+    }
     for (let i in tr) {
         if (tr[i].getAttribute && tr[i].getAttribute("data-param-name")) {
-            for (let x in url_params) {
-                if (url_params[x].name === tr[i].getAttribute("data-param-name")) {
-                    if (url_params[x].type === "object") {
-                        continue;
+            let param_name = tr[i].getAttribute("data-param-name");
+            let param = params_map.get(param_name);
+            if (param) {
+                if (param.type === "object") {
+                    continue;
+                }
+                let input_type = ""
+                if (param.type === "array") {
+                    render_url_arr_data(tr[i], param.value);
+                } else {
+                    let ele = null;
+                    if (tr[i].getElementsByTagName("input").length > 0) {
+                        input_type = "input";
+                        ele = tr[i].getElementsByTagName("input")[0];
                     }
-                    let input_type = ""
-                    if (url_params[x].type === "array") {
-                        render_url_arr_data(tr[i], url_params[x].value);
-                    } else {
-                        let ele = null;
-                        if (tr[i].getElementsByTagName("input").length > 0) {
-                            input_type = "input";
-                            ele = tr[i].getElementsByTagName("input")[0];
-                        }
-                        if (tr[i].getElementsByTagName("select").length > 0) {
-                            input_type = "select";
-                            ele = tr[i].getElementsByTagName("select")[0];
-                        }
-                        simulation_keyboard(ele, url_params[x].value, input_type);
+                    if (tr[i].getElementsByTagName("select").length > 0) {
+                        input_type = "select";
+                        ele = tr[i].getElementsByTagName("select")[0];
                     }
-
+                    simulation_keyboard(ele, param.value, input_type);
                 }
             }
         }
     }
 }
 
-//TODO 渲染url中的array参数
+//渲染url中的array参数
 function render_url_arr_data(tr, value) {
     let btns = tr.getElementsByTagName("button");
+    //选择最后一个添加按钮
     let last_btn = btns[btns.length - 1];
     let remove_input = tr.getElementsByClassName("btn btn-sm json-schema-form-item-remove null button");
     //先清掉输入框
@@ -357,4 +461,33 @@ function simulation_keyboard(element, value, type) {
         }
         element.dispatchEvent(ev2);
     }
+}
+
+
+//图片加载，https://www.cnblogs.com/tandaxia/p/5125275.html
+function getBase64ByImgUrl(url, callback) {
+    var canvas = document.createElement('canvas'),
+        ctx = canvas.getContext('2d'),
+        img = new Image;
+    img.crossOrigin = 'Anonymous';
+
+    img.onload = function () {
+        canvas.height = img.height;
+        canvas.width = img.width;
+        ctx.drawImage(img, 0, 0);
+        var dataURL = canvas.toDataURL('image/png');
+        callback(dataURL);
+        canvas = null;
+    };
+    img.src = url;
+}
+
+//将base64转换为文件流
+function getFileByBase64(dataurl, filename) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
 }
