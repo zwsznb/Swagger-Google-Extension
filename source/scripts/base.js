@@ -369,11 +369,7 @@ function render_file_param(url, tr) {
 //TODO 多文件,看看怎么模拟不同文件吧
 function render_file_params(url_arr, tr) {
     getBase64ByImgUrl(url_arr[0], function (dataURL) {
-        //传入base64数据和文件名字
-        let file_name = 'imgName-' + (new Date()).getTime();
-        let fileFlow = getFileByBase64(dataURL, file_name);
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(fileFlow);
+
         let btns = tr.getElementsByTagName("button");
         //选择最后一个添加按钮
         let last_btn = btns[btns.length - 1];
@@ -386,6 +382,11 @@ function render_file_params(url_arr, tr) {
         for (let i = 0; i < 2; i++) {
             //点击按钮添加输入框
             last_btn.click();
+            //传入base64数据和文件名字
+            let file_name = 'imgName-' + (new Date()).getTime();
+            let fileFlow = getFileByBase64(dataURL, file_name);
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(fileFlow);
             let input = tr.getElementsByTagName("input")[i];
             input.files = dataTransfer.files;
             let ev2 = new Event('change', { bubbles: true });
