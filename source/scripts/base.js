@@ -353,15 +353,19 @@ function render_file_param(url, tr) {
     let input = tr.getElementsByTagName("input")[0];
     getBase64ByImgUrl(url, function (dataURL) {
         //传入base64数据和文件名字
-        var fileFlow = getFileByBase64(dataURL, 'imgName-' + (new Date()).getTime());
-        console.log('fileFlow: ', fileFlow);
+        let file_name = 'imgName-' + (new Date()).getTime();
+        var fileFlow = getFileByBase64(dataURL, file_name);
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(fileFlow);
         input.files = dataTransfer.files;
+        // let nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+        // nativeInputValueSetter.call(input, file_name);
+        let ev2 = new Event('change', { bubbles: true });
+        input.dispatchEvent(ev2);
         // Help Safari out
-        if (input.webkitEntries.length) {
-            input.dataset.file = `${dataTransfer.files[0].name}`;
-        }
+        // if (input.webkitEntries.length) {
+        //     input.dataset.file = `${dataTransfer.files[0].name}`;
+        // }
     })
 }
 //TODO 多文件
