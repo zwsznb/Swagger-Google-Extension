@@ -342,24 +342,22 @@ function render_form_data(url_params, btn_ele) {
             }
             //多文件
             if (param.type === "array" && param.items_type && param.items_type === "file") {
+                render_file_params(param.value, trs[i]);
                 continue;
             }
         }
     }
 }
 //https://pqina.nl/blog/set-value-to-file-input/
-//TODO 渲染问题
 function render_file_param(url, tr) {
     let input = tr.getElementsByTagName("input")[0];
     getBase64ByImgUrl(url, function (dataURL) {
         //传入base64数据和文件名字
         let file_name = 'imgName-' + (new Date()).getTime();
-        var fileFlow = getFileByBase64(dataURL, file_name);
+        let fileFlow = getFileByBase64(dataURL, file_name);
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(fileFlow);
         input.files = dataTransfer.files;
-        // let nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-        // nativeInputValueSetter.call(input, file_name);
         let ev2 = new Event('change', { bubbles: true });
         input.dispatchEvent(ev2);
         // Help Safari out
@@ -368,9 +366,36 @@ function render_file_param(url, tr) {
         // }
     })
 }
-//TODO 多文件
-function render_file_params(url, tr) {
-
+//TODO 多文件,看看怎么模拟不同文件吧
+function render_file_params(url_arr, tr) {
+    getBase64ByImgUrl(url_arr[0], function (dataURL) {
+        //传入base64数据和文件名字
+        let file_name = 'imgName-' + (new Date()).getTime();
+        let fileFlow = getFileByBase64(dataURL, file_name);
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(fileFlow);
+        let btns = tr.getElementsByTagName("button");
+        //选择最后一个添加按钮
+        let last_btn = btns[btns.length - 1];
+        let remove_input = tr.getElementsByClassName("btn btn-sm json-schema-form-item-remove null button");
+        //先清掉输入框
+        while (remove_input.length > 0) {
+            remove_input[0].click();
+        }
+        //只模拟两个文件
+        for (let i = 0; i < 2; i++) {
+            //点击按钮添加输入框
+            last_btn.click();
+            let input = tr.getElementsByTagName("input")[i];
+            input.files = dataTransfer.files;
+            let ev2 = new Event('change', { bubbles: true });
+            input.dispatchEvent(ev2);
+        }
+        // Help Safari out
+        // if (input.webkitEntries.length) {
+        //     input.dataset.file = `${dataTransfer.files[0].name}`;
+        // }
+    })
 }
 
 function has_file_param(params) {
