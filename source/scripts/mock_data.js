@@ -14,6 +14,7 @@ function mock_guid() {
 function mock_date() {
     return Mock.mock('@datetime()');
 }
+
 function mock_timestamp() {
     return new Date(mock_date()).getTime();
 }
@@ -23,6 +24,7 @@ function mock_bool() {
         "boolean|1-2": true
     }).boolean;
 }
+
 function mock_number(min, max) {
     let name = `number|${min}-${max}`;
     return Mock.mock({
@@ -44,8 +46,9 @@ function mock_array() {
     }).array;
 }
 
-function mock_img_url() {
-    return 'http://dummyimage.com/200x100/4A7BF7&text=Hello';
-    //TODO bug?
-    // return Random.image('200x100', '#50B347', '#FFF', 'Mock.js');
+function mock_img_url(text) {
+    if (text) {
+        return Mock.Random.image('200x100', '#50B347', '#FFF', text);
+    }
+    return Mock.Random.image('200x100', '#50B347', '#FFF', "test");
 }
